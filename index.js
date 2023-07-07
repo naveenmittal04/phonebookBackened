@@ -2,7 +2,7 @@ const express = require('express')
 
 const app = express()
 
-const persons = [
+let persons = [
     {
         "id": 1,
         "name": "Arto Hellas",
@@ -45,6 +45,12 @@ app.get('/info', (request, response) => {
     +`<p> ${new Date()}</p>`)
 })
 
+app.delete('/api/persons/:id', (request, response) => {
+    const id = Number(request.params.id)
+    console.log(`delete /persons/${id} request received`)
+    persons = persons.filter(p => p.id !== id)
+    response.status(204).end()
+})
 const PORT = 3003
 app.listen(PORT, ()=>{
     console.log("server started")
