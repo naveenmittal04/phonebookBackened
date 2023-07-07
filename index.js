@@ -1,6 +1,7 @@
 const express = require('express')
 
 const app = express()
+app.use(express.json())
 
 let persons = [
     {
@@ -51,6 +52,40 @@ app.delete('/api/persons/:id', (request, response) => {
     persons = persons.filter(p => p.id !== id)
     response.status(204).end()
 })
+
+let maxId = 4
+
+
+const getId = () => {
+    maxId += 1
+    return maxId
+}
+
+app.post('/api/persons', (request, response) => {
+    const person = request.body
+    console.log(`add /persons/ ${person} request received`)
+    if(!person.hasOwnProperty('name')){
+        return response.status(400).json({
+            error: 'name missing'
+        })
+    }
+
+    if(!person.hasOwnProperty('number')){
+        return response.status(400).json({
+            error: 'number missing'
+        })
+    }
+
+    const newPerson = {
+        name: person.name,
+        number: person.number,
+        id: getId()
+    }
+
+    persons.push(newPerson)
+    response.json(newPerson)
+})
+
 const PORT = 3003
 app.listen(PORT, ()=>{
     console.log("server started")
