@@ -56,6 +56,13 @@ app.delete('/api/persons/:id', (request, response, next) => {
         .catch(error => next(error))
 })
 
+app.put('/api/persons/:id', (request, response, next) => {
+    Person.findByIdAndUpdate(request.params.id, request.body, {new: true})
+        .then(updatedPerson => {
+            response.json(updatedPerson)
+        })
+        .catch(error => next(error))
+})
 app.post('/api/persons', (request, response, next) => {
     const person = request.body
     console.log(`add /persons/ ${person} request received`)
@@ -71,29 +78,40 @@ app.post('/api/persons', (request, response, next) => {
         })
     }
 
-    // Person.find({name: person.name})
-    //     .then(result => {
-    //         if(result === []) {
-    //             return response.status(400).json({
-    //                 error: `name must be unique`
-    //             })
-    //         }
-    //
-    //     })
 
-    const newPerson = new Person({
-        name: person.name,
-        number: person.number
-    })
 
-    newPerson.save()
+    Person.find({name: person.name})
         .then(result => {
-            response.json(result)
+            console.log(result)
+            if(result.length !== 0) {
+                const newPerson = {
+                    name: person.name,
+                    number: person.number
+                }
+
+                Person.findByIdAndUpdate(result[0]._id.toString(), newPerson, {new: true})
+                    .then(updatedPerson => {
+                       return response.json(updatedPerson)
+                    })
+                    .catch(error => next(error))
+            } else {
+                const newPerson = new Person({
+                    name: person.name,
+                    number: person.number
+                })
+                newPerson.save()
+                    .then(result => {
+                        response.json(result)
+                    })
+                    .catch(error => {
+                        console.log('Failed to save to DB')
+                        next(error)
+                    })
+            }
         })
-        .catch(error=>{
-            console.log('Failed to save to DB')
-            next(error)
-        })
+        .catch(error => next(error))
+
+
 })
 
 const unknowEndpoint = (request, response) => {
