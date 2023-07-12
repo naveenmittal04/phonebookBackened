@@ -57,7 +57,7 @@ app.delete('/api/persons/:id', (request, response, next) => {
 })
 
 app.put('/api/persons/:id', (request, response, next) => {
-    Person.findByIdAndUpdate(request.params.id, request.body, {new: true})
+    Person.findByIdAndUpdate(request.params.id, request.body, {new: true, runValidators: true})
         .then(updatedPerson => {
             response.json(updatedPerson)
         })
@@ -89,7 +89,7 @@ app.post('/api/persons', (request, response, next) => {
                     number: person.number
                 }
 
-                Person.findByIdAndUpdate(result[0]._id.toString(), newPerson, {new: true})
+                Person.findByIdAndUpdate(result[0]._id.toString(), newPerson, {new: true, runValidators: true})
                     .then(updatedPerson => {
                        return response.json(updatedPerson)
                     })
@@ -123,12 +123,16 @@ app.use(unknowEndpoint)
 const errorHandler = (error, request, response, next) => {
     console.log(error.message)
     if(error.name === 'CastError'){
-        return response.status(400).end({
+        return response.status(400).send({
             error: 'malformed request'
         })
     } else if(error.name === 'BSONError') {
-        return response.status(400).end({
+        return response.status(400).send({
             error: 'malformed request'
+        })
+    } else if(error.name === 'ValidationError') {
+        return response.status(400).send({
+            error: error.message
         })
     }
 
