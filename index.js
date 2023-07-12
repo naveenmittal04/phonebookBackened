@@ -1,6 +1,9 @@
+require('dotenv').config()
+
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
+const Person = require('./models/person')
 
 const app = express()
 
@@ -11,63 +14,40 @@ app.use(cors())
 app.use(express.json())
 app.use(morgan(':method :url :status :req[content-length] - :response-time ms :type\n'))
 
-let persons = [
-    {
-        "id": 1,
-        "name": "Arto Hellas",
-        "number": "040-123456"
-    },
-    {
-        "id": 2,
-        "name": "Ada Lovelace",
-        "number": "39-44-5323523"
-    },
-    {
-        "id": 3,
-        "name": "Dan Abramov",
-        "number": "12-43-234345"
-    },
-    {
-        "id": 4,
-        "name": "Mary Poppendieck",
-        "number": "39-23-6423122"
-    }
-]
 app.get('/api/persons', (request, response) => {
-    console.log("get /persons/ request received")
-    response.json(persons)
+    Person.find({})
+        .then(persons => {
+            response.json(persons)
+        })
+        .catch(()=>{
+            console.log('Failed to get persons from DB')
+        })
 })
 
 app.get('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    console.log(`get /persons/${id} request received`)
-    const person = persons.find(p => p.id === id)
-    if(person){
-        response.json(person)
-    } else {
-        response.status(404).end()
-    }
+    Person.findById(request.params.id)
+        .then(person => {
+            response.json(person)
+        })
+        .catch(()=>{
+            response.status(404).end()
+        })
 })
 
 app.get('/info', (request, response) => {
-    response.end(`<p>Phonebook has info for ${persons.length} people</p>`
-    +`<p> ${new Date()}</p>`)
+    Person.count({})
+        .then(count => {
+            response.end(`<p>Phonebook has info for ${count} people</p>`
+                +`<p> ${new Date()}</p>`)
+        })
 })
 
 app.delete('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    console.log(`delete /persons/${id} request received`)
-    persons = persons.filter(p => p.id !== id)
-    response.status(204).end()
+    Person.deleteOne({_id:request.params.id})
+        .then(()=>{
+            response.status(204).end()
+        })
 })
-
-let maxId = 4
-
-
-const getId = () => {
-    maxId += 1
-    return maxId
-}
 
 app.post('/api/persons', (request, response) => {
     const person = request.body
@@ -84,23 +64,31 @@ app.post('/api/persons', (request, response) => {
         })
     }
 
-    if(persons.find(p => p.name === person.name)){
-        return response.status(400).json({
-            error: `name must be unique`
-        })
-    }
+    // Person.find({name: person.name})
+    //     .then(result => {
+    //         if(result === []) {
+    //             return response.status(400).json({
+    //                 error: `name must be unique`
+    //             })
+    //         }
+    //
+    //     })
 
-    const newPerson = {
+    const newPerson = new Person({
         name: person.name,
-        number: person.number,
-        id: getId()
-    }
+        number: person.number
+    })
 
-    persons.push(newPerson)
-    response.json(newPerson)
+    newPerson.save()
+        .then(result => {
+            response.json(result)
+        })
+        .catch(()=>{
+            console.log('Failed to save to DB')
+        })
 })
 
-const PORT = process.env.PORT || 3003
+const PORT = process.env.PORT
 app.listen(PORT, ()=>{
     console.log("server started")
 })

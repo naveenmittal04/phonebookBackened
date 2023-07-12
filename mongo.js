@@ -7,12 +7,17 @@ if(inputs.length < 3){
     return
 }
 
-const password = inputs[2]
-
-const url = `mongodb+srv://naveenmittal04:${password}@cluster0.iurwwfg.mongodb.net/phonebookApp?retryWrites=true&w=majority`
+const url = process.env.MONGODB_URI
 
 mongoose.set('strictQuery', false)
+
 mongoose.connect(url)
+    .then(()=>{
+        console.log('Connected to MongoDB')
+    })
+    .catch(() => {
+        console.log('Failed to Connect to DB')
+    })
 
 const phonebookSchema = mongoose.Schema({
     name: String,
