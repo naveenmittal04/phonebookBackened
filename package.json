@@ -10,12 +10,15 @@
     "build:ui": "rm -rf build && cd \"C:\\Users\\Naveen\\My Drive (naveenmittal04@gmail.com)\\Projects\\fullstackopen2023\\part2\\phonebook\" && npm run build && cp -r build \"C:\\Users\\Naveen\\Documents\\phonebookBackend\"",
     "deploy": "flyctl deploy",
     "deploy:full": "npm run build:ui && npm run deploy",
-    "remote:logs": "flyctl logs"
+    "remote:logs": "flyctl logs",
+    "lint": "eslint . --fix"
   },
   "author": "Naveen Mittal",
   "license": "ISC",
   "devDependencies": {
     "@flydotio/dockerfile": "^0.3.1",
+    "eslint": "^8.44.0",
+    "eslint-plugin-react": "^7.32.2",
     "nodemon": "^2.0.22"
   },
   "dependencies": {

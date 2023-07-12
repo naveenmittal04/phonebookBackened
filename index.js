@@ -19,7 +19,7 @@ app.get('/api/persons', (request, response, next) => {
         .then(persons => {
             response.json(persons)
         })
-        .catch(error=>{
+        .catch(error => {
             console.log('Failed to get persons from DB')
             next(error)
         })
@@ -34,7 +34,7 @@ app.get('/api/persons/:id', (request, response, next) => {
                 response.status(404).end()
             }
         })
-        .catch((error)=>{
+        .catch((error) => {
             next(error)
         })
 })
@@ -49,15 +49,15 @@ app.get('/info', (request, response, next) => {
 })
 
 app.delete('/api/persons/:id', (request, response, next) => {
-    Person.deleteOne({_id:request.params.id})
-        .then(()=>{
+    Person.deleteOne({ _id:request.params.id })
+        .then(() => {
             response.status(204).end()
         })
         .catch(error => next(error))
 })
 
 app.put('/api/persons/:id', (request, response, next) => {
-    Person.findByIdAndUpdate(request.params.id, request.body, {new: true, runValidators: true})
+    Person.findByIdAndUpdate(request.params.id, request.body, { new: true, runValidators: true })
         .then(updatedPerson => {
             response.json(updatedPerson)
         })
@@ -66,13 +66,13 @@ app.put('/api/persons/:id', (request, response, next) => {
 app.post('/api/persons', (request, response, next) => {
     const person = request.body
     console.log(`add /persons/ ${person} request received`)
-    if(!person.hasOwnProperty('name')){
+    if(!person.name){
         return response.status(400).json({
             error: 'name missing'
         })
     }
 
-    if(!person.hasOwnProperty('number')){
+    if(!person.number){
         return response.status(400).json({
             error: 'number missing'
         })
@@ -80,7 +80,7 @@ app.post('/api/persons', (request, response, next) => {
 
 
 
-    Person.find({name: person.name})
+    Person.find({ name: person.name })
         .then(result => {
             console.log(result)
             if(result.length !== 0) {
@@ -89,9 +89,9 @@ app.post('/api/persons', (request, response, next) => {
                     number: person.number
                 }
 
-                Person.findByIdAndUpdate(result[0]._id.toString(), newPerson, {new: true, runValidators: true})
+                Person.findByIdAndUpdate(result[0]._id.toString(), newPerson, { new: true, runValidators: true })
                     .then(updatedPerson => {
-                       return response.json(updatedPerson)
+                        return response.json(updatedPerson)
                     })
                     .catch(error => next(error))
             } else {
@@ -115,7 +115,7 @@ app.post('/api/persons', (request, response, next) => {
 })
 
 const unknowEndpoint = (request, response) => {
-    response.status(404).send({error: 'unknown endpoint'})
+    response.status(404).send({ error: 'unknown endpoint' })
 }
 
 app.use(unknowEndpoint)
@@ -142,6 +142,6 @@ const errorHandler = (error, request, response, next) => {
 app.use(errorHandler)
 
 const PORT = process.env.PORT
-app.listen(PORT, ()=>{
+app.listen(PORT, () => {
     console.log("server started")
 })
